@@ -6,10 +6,12 @@ return {
         build = ":TSUpdate",
 
         config = function()
-            require("nvim-treesitter").setup()
+            local ts = require("nvim-treesitter")
+            ts.setup()
+            ts.install({ "go", "gomod", "gosum", "gowork", "lua" })
 
             vim.api.nvim_create_autocmd("FileType", {
-                pattern = { "elixir", "heex", "eex" },
+                pattern = { "go", "gomod", "gowork", "gosum" },
                 callback = function()
                     pcall(vim.treesitter.start)
                 end,
@@ -17,4 +19,3 @@ return {
         end,
     },
 }
-

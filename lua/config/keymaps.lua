@@ -21,82 +21,71 @@ local function toggle_comment()
     end)
 end
 
-vim.keymap.set("x", "L", toggle_comment, {
-    desc = "toggle comments",
-})
+vim.keymap.set("x", "L", toggle_comment, { desc = "toggle comments" })
+vim.keymap.set("x", "F", toggle_comment, { desc = "toggle uncomments" })
 
-vim.keymap.set("x", "F", toggle_comment, {
-    desc = "toggle uncomments",
-})
+-- ── Visual-mode line motions ─────────────────────────────────────────
+keymap.set("v", "<leader>l",  "$")
+keymap.set("v", "<leader>h",  "0")
+keymap.set("v", "<leader>G",  "G",  { desc = "all the way down" })
+keymap.set("v", "<leader>gg", "gg", { desc = "all the way up" })
 
-keymap.set("v", "<leader>l", "$")
-keymap.set("v", "<leader>h", "0")
-keymap.set("v", "hh", "G")
-keymap.set("v", "ff", "gg")
+-- ── File / buffer commands ───────────────────────────────────────────
+keymap.set("n", "<leader>w", "<cmd>write<CR>",  { desc = "save",                silent = true })
+keymap.set("n", "<leader>q", "<cmd>quit<CR>",   { desc = "quit",                silent = true })
+keymap.set("n", "<leader>Q", "<cmd>quit!<CR>",  { desc = "quit without saving", silent = true })
+keymap.set("n", "<leader>x", "<cmd>wq<CR>",     { desc = "save and quit",       silent = true })
+keymap.set("n", "<Esc>",     "<cmd>nohlsearch<CR><Esc>", { desc = "clear search highlight", silent = true })
 
-keymap.set("n", "<leader>w", ":w<CR>")
-keymap.set("n", "<leader>q", ":q<CR>")
-keymap.set("n", "<leader>Q", ":q!<CR>")
-keymap.set("n", "<leader>x", ":wq<CR>")
-keymap.set("n", "<Esc>", "<cmd>noh<CR><Esc>")
-keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<CR>")
-keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<CR>")
-keymap.set("i", "jj", "<Esc>")
-keymap.set("n", "<leader>e", vim.diagnostic.open_float)
+keymap.set("n", "<leader>ff", "<cmd>Telescope find_files<CR>", { desc = "find files", silent = true })
+keymap.set("n", "<leader>fg", "<cmd>Telescope live_grep<CR>",  { desc = "live grep",  silent = true })
 
-keymap.set("n", "j", "k")
-keymap.set("n", "k", "j")
+keymap.set("i", "jj", "<Esc>", { desc = "escape insert mode" })
 
+-- diagnostics — works without LSP too (linters, etc.), so stays global
+keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "line diagnostics" })
+
+-- ── Remapped motions (intentional design choices) ────────────────────
 keymap.set("n", "e", "w")
 keymap.set("n", "q", "b")
-
-
-keymap.set("v", "j", "k")
-keymap.set("v", "k", "j")
-
 keymap.set("v", "e", "w")
 keymap.set("v", "q", "b")
-
 keymap.set("n", "r", "e")
 
-keymap.set("n", "<leader>n", ":Neotree toggle<CR>")
+keymap.set("n", "<leader>n", "<cmd>Neotree toggle<CR>", { desc = "toggle file tree", silent = true })
 
-keymap.set("n", "<leader>h", vim.lsp.buf.hover, { desc = "hover" })
+keymap.set("n", "<Tab>",   "<cmd>bnext<CR>",     { desc = "next buffer",     silent = true })
+keymap.set("n", "<S-Tab>", "<cmd>bprevious<CR>", { desc = "previous buffer", silent = true })
 
-keymap.set("n", "<Tab>", ":bnext<CR>")
-keymap.set("n", "<S-Tab>", ":bprevious<CR>")
-
-keymap.set("n", "w", "h")
-keymap.set("n", "r", "l")
-
-keymap.set("n", "l", "<CR>")
-
-keymap.set("n", "<leader>f", function()
-    vim.lsp.buf.format()
-end)
-
+-- ── Line-navigation helpers (non-prefix, count-friendly) ─────────────
 keymap.set("n", "<leader>l", "$")
-
-keymap.set("n", "gd", vim.lsp.buf.definition, { desc = "go to definition" })
-
-keymap.set("n", "cb", "cib", { remap = true })
-
 keymap.set("n", "<leader>h", "0")
 
-keymap.set("n", "<Space>", function()
-    vim.cmd("normal! " .. vim.v.count .. "gg")
-end)
+keymap.set("n", "<leader>J", function()
+    vim.cmd("normal! " .. vim.v.count1 .. "gg")
+end, { desc = "jump to line (count)" })
 
-keymap.set("n", "<leader>j", ...)
+keymap.set("n", "<leader>d", "<C-d>", { desc = "scroll down" })
+keymap.set("n", "<leader>u", "<C-u>", { desc = "scroll up" })
 
-keymap.set("n", "nn", "<C-d>", { desc = "scroll down" })
-keymap.set("n", "cc", "<C-u>", { desc = "croll up" })
-keymap.set("n", "cn", ..., { desc = "ignore" })
+keymap.set("n", "<leader>G",  "G",  { desc = "all the way down" })
+keymap.set("n", "<leader>gg", "gg", { desc = "all the way up" })
 
-keymap.set("n", "hh", "G", { desc="all the way down" })
-keymap.set("n", "ff", "gg", { desc="all the way up" })
+keymap.set("n", "<leader>ci", "cib", { remap = true, desc = "change inside block" })
 
-vim.keymap.set("n", "<Space>", "<Nop>", {
-    silent = true,
-    remap = false,
+-- ── Buffer-local LSP mappings: active only when an LSP attaches ──────
+vim.api.nvim_create_autocmd("LspAttach", {
+    callback = function(args)
+        local buf = args.buf
+
+        keymap.set("n", "gd", vim.lsp.buf.definition, {
+            buffer = buf, silent = true, desc = "go to definition",
+        })
+        keymap.set("n", "<leader>k", vim.lsp.buf.hover, {
+            buffer = buf, silent = true, desc = "hover",
+        })
+        keymap.set("n", "<leader>F", function()
+            vim.lsp.buf.format({ bufnr = buf })
+        end, { buffer = buf, silent = true, desc = "format buffer" })
+    end,
 })

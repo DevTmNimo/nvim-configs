@@ -1,5 +1,5 @@
 vim.cmd("syntax on")
-vim.opt.filetype = "on"
+vim.cmd("filetype on")
 
 vim.g.mapleader = " "
 vim.g.maplocalleader = " "
@@ -19,18 +19,16 @@ end
 vim.opt.rtp:prepend(lazypath)
 
 vim.opt.number = true
-vim.opt.tabstop = 5
+vim.opt.tabstop = 6
 vim.opt.guicursor = "a:block-Cursor"
 
-require("lazy").setup("plugins")
+require("lazy").setup("plugins", {
+    rocks = { enabled = false },
+})
 require("config.keymaps")
 
 vim.diagnostic.config({
     virtual_text = true,
 })
 
-vim.cmd.colorscheme("moonfly")
-
-vim.api.nvim_set_hl(0, "Normal", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "NormalNC", { bg = "NONE" })
-vim.api.nvim_set_hl(0, "NormalFloat", { bg = "NONE" })
+require("config.options")
